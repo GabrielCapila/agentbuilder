@@ -1,0 +1,35 @@
+
+    location = /gameloans_index_fallback {
+        alias /home/ubuntu/game-loans/front-end/index.html;
+    }
+
+    location /gameloans/api/ {
+        proxy_pass http://localhost:7108/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    ###################################################
+    #                MCP (Agent Builder)              #
+    ###################################################
+location = /mcp {
+    return 301 /mcp/;
+}
+location ^~ /mcp/ {
+    proxy_pass http://127.0.0.1:5555/mcp;
+    proxy_http_version 1.1;
+
+    proxy_set_header Host $host;
+    proxy_set_header Authorization $http_authorization;
+    proxy_set_header Accept $http_accept;
+
+    # SSE
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_set_header X-Accel-Buffering no;
+    chunked_transfer_encoding off;
+
+    proxy_read_timeout 3600;
+    proxy_send_timeout 3600;
+}
+}
