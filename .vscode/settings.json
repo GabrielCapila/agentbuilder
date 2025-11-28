@@ -1,0 +1,27 @@
+{
+    // 1. Define o Prettier como o formatador padrão para arquivos JavaScript
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    
+    // 2. Habilita a formatação automática ao salvar
+    "editor.formatOnSave": true,
+
+    // 3. Habilita a correção automática de problemas do ESLint ao salvar
+    // O valor "explicit" garante que o fix só seja aplicado se o arquivo for salvo explicitamente.
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+
+    // 4. Configurações básicas do Prettier (opcional, mas útil)
+    "prettier.singleQuote": true,
+    "prettier.trailingComma": "all",
+    "prettier.semi": true,
+    "prettier.tabWidth": 2
+}
