@@ -13,28 +13,19 @@ const getGameGuesses = {
   },
   handler: async ({ teamName, date }) => {
     try {
-      // Busca o id do time pelo nome
-      const teamSql = `SELECT id FROM teams WHERE name = ? LIMIT 1`;
-      const [teamRows] = await pool.query(teamSql, [teamName]);
-      const team = teamRows?.[0];
-      if (!team) {
-        return {
-          content: [{ type: 'text', text: `Time '${teamName}' não encontrado.` }],
-        };
-      }
-      // Busca o fixture (jogo) pelo id do time e data
+      // Busca o fixture (jogo) pelo nome da partida e data na tabela fixtures
       const fixtureSql = `
-        SELECT id, homeId, awayId, matchDate
-        FROM matches
-        WHERE (homeId = ? OR awayId = ?)
-          AND DATE(matchDate) = ?
+        SELECT id, name, start
+        FROM fixtures
+        WHERE name LIKE ?
+          AND DATE(start) = ?
         LIMIT 1
       `;
-      const [fixtureRows] = await pool.query(fixtureSql, [team.id, team.id, date]);
+      const [fixtureRows] = await pool.query(fixtureSql, [`%${teamName}%`, date]);
       const fixture = fixtureRows?.[0];
       if (!fixture) {
         return {
-          content: [{ type: 'text', text: `Nenhum jogo encontrado para o time '${teamName}' na data ${date}.` }],
+          content: [{ type: 'text', text: `Nenhum jogo encontrado com '${teamName}' na data ${date}.` }],
         };
       }
       // Busca os palpites para o jogo encontrado
