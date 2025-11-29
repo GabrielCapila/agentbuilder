@@ -1,6 +1,7 @@
 // src/mcp/server.js
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import getMonthTopUser from './tools/getMonthTopUser.js';
+import getGameGuesses from './tools/getGameGuesses.js';
 import { info } from '../utils/logger.js';
 
 // Cria a instância do servidor MCP
@@ -20,5 +21,6 @@ const registerTool = (tool) => {
 
 // Registro das ferramentas
 registerTool(getMonthTopUser);
+registerTool(getGameGuesses);
 
 export default mcpServer;
