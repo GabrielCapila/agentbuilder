@@ -2,6 +2,7 @@
 import { z } from 'zod';
 import pool from '../../config/db.js';
 import { error } from '../../utils/logger.js';
+import { text } from 'stream/consumers';
 
 // Definição da ferramenta
 const getGameGuesses = {
@@ -46,8 +47,8 @@ const getGameGuesses = {
       return {
         content: [
           {
-            type: 'json',
-            json: guessRows,
+            type: 'text',
+            text: JSON.stringify(guessRows, null, 2),
           },
         ],
       };
