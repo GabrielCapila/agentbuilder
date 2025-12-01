@@ -52,17 +52,22 @@ const getGameGuesses = {
               };
             }
             const result = rows[0];
+            // Monta texto legível
+            let text = `Jogo: ${result.matchName}\nData/Hora: ${result.matchDateTime}\nTotal de palpites: ${result.guessesCount}\n`;
+            const guessesArr = result.guesses ? JSON.parse(result.guesses) : [];
+            if (guessesArr.length) {
+              text += '\nPalpites:';
+              guessesArr.forEach((g, idx) => {
+                text += `\n${idx + 1}. ${g.userName} (${g.userId}): ${g.homeGoals} x ${g.awayGoals} às ${g.createdAt}`;
+              });
+            } else {
+              text += '\nNenhum palpite registrado.';
+            }
             return {
               content: [
                 {
-                  type: 'json',
-                  json: {
-                    fixtureId: result.fixtureId,
-                    matchName: result.matchName,
-                    matchDateTime: result.matchDateTime,
-                    guessesCount: result.guessesCount,
-                    guesses: result.guesses ? JSON.parse(result.guesses) : [],
-                  },
+                  type: 'text',
+                  text,
                 },
               ],
             };
