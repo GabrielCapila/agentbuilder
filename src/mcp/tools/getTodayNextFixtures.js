@@ -51,8 +51,8 @@ const getTodayNextFixtures = {
       return {
         content: 
           {
-            type: 'json',
-            json: JSON.stringify(results, null, 2)
+            type: 'text',
+            text: JSON.stringify(results, null, 2)
           },
       };
     } catch (err) {
