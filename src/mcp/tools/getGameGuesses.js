@@ -25,54 +25,48 @@ const getGameGuesses = {
       const [fixtureRows] = await pool.query(fixtureSql, [`%${teamName}%`, date]);
       const fixture = fixtureRows?.[0];
       if (!fixture) {
-        return {
-          content: [{ type: 'text', text: `Nenhum jogo encontrado com '${teamName}' na data ${date}.` }],
-        };
-      }
-      // Busca os palpites para o jogo encontrado
-      const guessSql = `
-        SELECT
-          g.id AS guessId,
-          g.userId,
-          u.name AS userName,
-          g.homeGoals,
-          g.awayGoals,
-          g.createdAt
-        FROM guesses g
-        JOIN users u ON u.id = g.userId
-        WHERE g.fixtureId = ?
-        ORDER BY g.createdAt ASC
-      `;
-      const [guessRows] = await pool.query(guessSql, [fixture.id]);
-
-      // Quantidade total de palpites
-      const totalGuesses = guessRows.length;
-
-      // Agregação por resultado (exemplo: quantidade de palpites para cada placar)
-      const resultMap = {};
-      for (const guess of guessRows) {
-        const key = `${guess.homeGoals}x${guess.awayGoals}`;
-        if (!resultMap[key]) resultMap[key] = 0;
-        resultMap[key]++;
-      }
-
-      return {
-        content: [
-          {
-            type: 'json',
-            json: {
-              fixture: {
-                id: fixture.id,
-                name: fixture.name,
-                start: fixture.start,
-              },
-              totalGuesses,
-              guessesByResult: resultMap,
-              guesses: guessRows,
-            },
-          },
-        ],
-      };
+            // Busca todas as informações agregadas dos palpites desse fixture
+            const sql = `SELECT
+              f.id AS fixtureId,
+              f.name AS matchName,
+              f.start AS matchDateTime,
+              COUNT(g.id) AS guessesCount,
+              JSON_ARRAYAGG(JSON_OBJECT(
+                'guessId', g.id,
+                'userId', g.userId,
+                'userName', u.name,
+                'homeGoals', g.homeGoals,
+                'awayGoals', g.awayGoals,
+                'createdAt', g.createdAt
+              )) AS guesses
+            FROM fixtures f
+            LEFT JOIN guesses g ON g.fixtureId = f.id
+            LEFT JOIN users u ON u.id = g.userId
+            WHERE f.id = ?
+            GROUP BY f.id, f.name, f.start
+            LIMIT 1`;
+            const [rows] = await pool.query(sql, [fixture.id]);
+            if (!rows.length) {
+              return {
+                content: [{ type: 'text', text: 'Nenhum palpite encontrado para este jogo.' }],
+              };
+            }
+            const result = rows[0];
+            return {
+              content: [
+                {
+                  type: 'json',
+                  json: {
+                    fixtureId: result.fixtureId,
+                    matchName: result.matchName,
+                    matchDateTime: result.matchDateTime,
+                    guessesCount: result.guessesCount,
+                    guesses: result.guesses ? JSON.parse(result.guesses) : [],
+                  },
+                },
+              ],
+            };
+          }
     } catch (err) {
       error('ERRO get-game-guesses:', err);
       return {
