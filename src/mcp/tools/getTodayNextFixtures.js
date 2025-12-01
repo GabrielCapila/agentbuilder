@@ -40,20 +40,28 @@ const getTodayNextFixtures = {
           content: [{ type: 'text', text: 'Nenhum jogo futuro encontrado para hoje.' }],
         };
       }
-      // Ajusta guesses para array vazio se não houver palpites
-      const results = rows.map(row => ({
-        fixtureId: row.fixtureId,
-        matchName: row.matchName,
-        matchDateTime: row.matchDateTime,
-        guessesCount: row.guessesCount,
-        guesses: row.guesses ? JSON.parse(row.guesses) : [],
-      }));
+      // Formata o retorno como texto legível
+      let text = '';
+      rows.forEach((row, idx) => {
+        text += `Jogo ${idx + 1}: ${row.matchName}\nData/Hora: ${row.matchDateTime}\nTotal de palpites: ${row.guessesCount}\n`;
+        const guessesArr = row.guesses ? JSON.parse(row.guesses) : [];
+        if (guessesArr.length) {
+          text += 'Palpites:';
+          guessesArr.forEach((g, i) => {
+            text += `\n  ${i + 1}. ${g.homeGoals} x ${g.awayGoals} às ${g.createdAt}`;
+          });
+        } else {
+          text += 'Nenhum palpite registrado.';
+        }
+        text += '\n\n';
+      });
       return {
-        content: 
+        content: [
           {
             type: 'text',
-            text: JSON.stringify(results, null, 2)
+            text,
           },
+        ],
       };
     } catch (err) {
       error('ERRO get-today-next-fixtures:', err);
