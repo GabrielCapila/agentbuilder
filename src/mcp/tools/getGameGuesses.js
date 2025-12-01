@@ -44,11 +44,32 @@ const getGameGuesses = {
         ORDER BY g.createdAt ASC
       `;
       const [guessRows] = await pool.query(guessSql, [fixture.id]);
+
+      // Quantidade total de palpites
+      const totalGuesses = guessRows.length;
+
+      // Agregação por resultado (exemplo: quantidade de palpites para cada placar)
+      const resultMap = {};
+      for (const guess of guessRows) {
+        const key = `${guess.homeGoals}x${guess.awayGoals}`;
+        if (!resultMap[key]) resultMap[key] = 0;
+        resultMap[key]++;
+      }
+
       return {
         content: [
           {
-            type: 'text',
-            text: JSON.stringify(guessRows, null, 2),
+            type: 'json',
+            json: {
+              fixture: {
+                id: fixture.id,
+                name: fixture.name,
+                start: fixture.start,
+              },
+              totalGuesses,
+              guessesByResult: resultMap,
+              guesses: guessRows,
+            },
           },
         ],
       };
