@@ -30,7 +30,7 @@ const getTodayNextFixtures = {
         FROM fixtures f
         JOIN teams t1 ON t1.id = f.homeId
         JOIN teams t2 ON t2.id = f.awayId
-        JOIN championships c ON c.id = f.leagueId
+        JOIN league c ON c.id = f.leagueId
         LEFT JOIN guesses g ON g.fixtureId = f.id
         WHERE f.start > ?
         GROUP BY f.id, t1.name, t2.name, f.start, c.name
