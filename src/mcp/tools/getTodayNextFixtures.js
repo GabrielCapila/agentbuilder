@@ -28,9 +28,10 @@ const getTodayNextFixtures = {
             'awayGoals', g.awayGoals
           )) AS guessesArr
         FROM fixtures f
-        JOIN teams t1 ON t1.id = f.homeId
-        JOIN teams t2 ON t2.id = f.awayId
-        JOIN league c ON c.id = f.leagueId
+        JOIN matches m ON m.fixtureId = f.id 
+        JOIN teams t1 ON t1.id = m.homeId 
+        JOIN teams t2 ON t2.id = m.awayId 
+        JOIN leagues c ON c.id = f.leagueId
         LEFT JOIN guesses g ON g.fixtureId = f.id
         WHERE f.start > ?
         GROUP BY f.id, t1.name, t2.name, f.start, c.name
