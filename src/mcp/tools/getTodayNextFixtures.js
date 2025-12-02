@@ -14,46 +14,90 @@ const getTodayNextFixtures = {
       const brNow = new Date(now.getTime() - 3 * 60 * 60 * 1000); // UTC-3
       // Busca jogos a partir do horário atual do Brasil
       const brNowStr = brNow.toISOString().slice(0, 19).replace('T', ' ');
+      // Novo select com join em teams e agregações para stats e mostGuessedScores
       const sql = `
         SELECT
-          f.id AS fixtureId,
-          f.name AS matchName,
-          f.start AS matchDateTime,
-          COUNT(g.id) AS guessesCount,
+          f.id AS id,
+          t1.name AS home,
+          t2.name AS away,
+          f.start AS date,
+          c.name AS championship,
+          COUNT(g.id) AS guesses,
           JSON_ARRAYAGG(JSON_OBJECT(
-            'guessId', g.id,
             'homeGoals', g.homeGoals,
-            'awayGoals', g.awayGoals,
-            'createdAt', g.createdAt
-          )) AS guesses
+            'awayGoals', g.awayGoals
+          )) AS guessesArr
         FROM fixtures f
+        JOIN teams t1 ON t1.id = f.homeId
+        JOIN teams t2 ON t2.id = f.awayId
+        JOIN championships c ON c.id = f.leagueId
         LEFT JOIN guesses g ON g.fixtureId = f.id
-        LEFT JOIN users u ON u.id = g.userId
         WHERE f.start > ?
-        GROUP BY f.id, f.name, f.start
+        GROUP BY f.id, t1.name, t2.name, f.start, c.name
         ORDER BY f.start ASC
         LIMIT 5
       `;
       const [rows] = await pool.query(sql, [brNowStr]);
       if (!rows.length) {
         return {
-          content: [{ type: 'text', text: 'Nenhum jogo futuro encontrado para hoje.' }],
+          content: [{ type: 'json', json: { name: 'update_upcoming_games', params: { games: [] } } }],
         };
       }
-      // Formata o retorno como texto legível
-      let text = '';
-      rows.forEach((row, idx) => {
-        text += `Jogo ${idx + 1}: ${row.matchName}\nData/Hora: ${row.matchDateTime}\nTotal de palpites: ${row.guessesCount}\n`;
-        const guessesArr = row.guesses ? JSON.parse(row.guesses) : [];
+      // Processa agregações para cada jogo
+      const games = rows.map(row => {
+        const guessesArr = row.guessesArr ? JSON.parse(row.guessesArr) : [];
+        // Média de placar
+        let avgHome = 0, avgAway = 0;
         if (guessesArr.length) {
-          text += 'Palpites:';
-          guessesArr.forEach((g, i) => {
-            text += `\n  ${i + 1}. ${g.homeGoals} x ${g.awayGoals}`;
-          });
-        } else {
-          text += 'Nenhum palpite registrado.';
+          avgHome = Math.round(guessesArr.reduce((acc, g) => acc + (g.homeGoals || 0), 0) / guessesArr.length);
+          avgAway = Math.round(guessesArr.reduce((acc, g) => acc + (g.awayGoals || 0), 0) / guessesArr.length);
         }
-        text += '\n\n';
+        // Estatísticas de resultado
+        let vitHome = 0, empate = 0, vitAway = 0;
+        const scoreMap = {};
+        guessesArr.forEach(g => {
+          if (g.homeGoals > g.awayGoals) vitHome++;
+          else if (g.homeGoals < g.awayGoals) vitAway++;
+          else empate++;
+          const scoreStr = `${g.homeGoals} x ${g.awayGoals}`;
+          scoreMap[scoreStr] = (scoreMap[scoreStr] || 0) + 1;
+        });
+        // Placar mais apostado
+        const mostGuessedScores = Object.entries(scoreMap)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([score, count]) => ({ score, count }));
+        return {
+          id: row.id,
+          home: row.home,
+          away: row.away,
+          date: row.date,
+          championship: row.championship,
+          guesses: row.guesses,
+          avgScore: `${avgHome} x ${avgAway}`,
+          stats: [
+            { label: `Vitória ${row.home}`, value: vitHome },
+            { label: 'Empate', value: empate },
+            { label: `Vitória ${row.away}`, value: vitAway }
+          ],
+          mostGuessedScores
+        };
+      });
+      // Monta string conforme o modelo solicitado
+      let text = 'update_upcoming_games\n';
+      games.forEach(game => {
+        text += `\nJogo: ${game.home} x ${game.away}\n`;
+        text += `Data: ${game.date}\nCampeonato: ${game.championship}\n`;
+        text += `Palpites: ${game.guesses}\nMédia de placar: ${game.avgScore}\n`;
+        text += 'Estatísticas:\n';
+        game.stats.forEach(stat => {
+          text += `  - ${stat.label}: ${stat.value}\n`;
+        });
+        text += 'Placar mais apostado:\n';
+        game.mostGuessedScores.forEach(ms => {
+          text += `  - ${ms.score}: ${ms.count}\n`;
+        });
+        text += '\n';
       });
       return {
         content: [
