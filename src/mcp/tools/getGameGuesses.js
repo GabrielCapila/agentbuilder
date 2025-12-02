@@ -37,8 +37,6 @@ const getGameGuesses = {
             COUNT(g.id) AS guessesCount,
             JSON_ARRAYAGG(JSON_OBJECT(
               'guessId', g.id,
-              'userId', g.userId,
-              'userName', u.name,
               'homeGoals', g.homeGoals,
               'awayGoals', g.awayGoals,
               'createdAt', g.createdAt
@@ -62,7 +60,7 @@ const getGameGuesses = {
           if (guessesArr.length) {
             text += '\nPalpites:';
             guessesArr.forEach((g, idx) => {
-              text += `\n${idx + 1}. ${g.userName} (${g.userId}): ${g.homeGoals} x ${g.awayGoals} às ${g.createdAt}`;
+              text += `\n${idx + 1}.  ${g.homeGoals} x ${g.awayGoals}`;
             });
           } else {
             text += '\nNenhum palpite registrado.';

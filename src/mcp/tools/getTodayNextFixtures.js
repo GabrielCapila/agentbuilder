@@ -48,7 +48,7 @@ const getTodayNextFixtures = {
         if (guessesArr.length) {
           text += 'Palpites:';
           guessesArr.forEach((g, i) => {
-            text += `\n  ${i + 1}. ${g.homeGoals} x ${g.awayGoals} às ${g.createdAt}`;
+            text += `\n  ${i + 1}. ${g.homeGoals} x ${g.awayGoals}`;
           });
         } else {
           text += 'Nenhum palpite registrado.';
