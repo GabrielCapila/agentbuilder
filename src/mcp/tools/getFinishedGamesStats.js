@@ -36,7 +36,7 @@ const getFinishedGamesStats = {
         JOIN teams t1 ON t1.id = m.homeId 
         JOIN teams t2 ON t2.id = m.awayId
         JOIN leagues c ON c.id = f.leagueId
-          WHERE f.finished = 1 AND f.start < '2025-12-02 08:59:00'
+          WHERE f.finished = 1 AND f.start < ?
           GROUP BY f.id, t1.name, t2.name, f.start, c.name, m.homeGoals, m.awayGoals
         	ORDER BY f.start DESC
         LIMIT ?
