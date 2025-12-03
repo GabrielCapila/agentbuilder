@@ -9,10 +9,9 @@ const getGameGuesses = {
   name: 'get-game-guesses',
   description: 'Retorna os palpites feitos para um jogo específico.',
   schema: {
-    teamName: z.string().min(1),
-    date: z.string().min(10), // formato esperado: 'YYYY-MM-DD'
+    teamName: z.string().min(1)
   },
-  handler: async ({ teamName, date }) => {
+  handler: async ({ teamName }) => {
     try {
       // Considera o fuso horário do Brasil (UTC-3)
       const now = new Date();
