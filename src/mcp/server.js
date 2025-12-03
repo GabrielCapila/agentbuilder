@@ -1,6 +1,5 @@
-import getFinishedGamesStats from './tools/getFinishedGamesStats.js';
-registerTool(getFinishedGamesStats);
 // src/mcp/server.js
+import getFinishedGamesStats from './tools/getFinishedGamesStats.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import getMonthTopUser from './tools/getMonthTopUser.js';
 import getGameGuesses from './tools/getGameGuesses.js';
