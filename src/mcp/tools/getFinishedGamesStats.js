@@ -38,6 +38,7 @@ const getFinishedGamesStats = {
           WHERE f.finished = 1 AND f.start < ?
           GROUP BY f.id, t1.name, t2.name, f.start, c.name, m.homeGoals, m.awayGoals
         	ORDER BY f.start DESC
+            LIMIT 100
       `;
       const params = [brDateStr + ' 23:59:59'];
       const [rows] = await pool.query(sql, params);
