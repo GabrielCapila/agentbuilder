@@ -21,9 +21,10 @@ const getGameGuesses = {
       const fixtureSql = `
         SELECT f.id, t1.name AS home, t2.name AS away, f.start AS date, c.name AS championship
         FROM fixtures f
-        JOIN teams t1 ON t1.id = f.homeId
-        JOIN teams t2 ON t2.id = f.awayId
-        JOIN championships c ON c.id = f.leagueId
+        JOIN matches m ON m.fixtureId = f.id 
+        JOIN teams t1 ON t1.id = m.homeId 
+        JOIN teams t2 ON t2.id = m.awayId
+        JOIN leagues c ON c.id = f.leagueId
         WHERE t1.name = ? AND t2.name = ? AND f.start > ?
         ORDER BY f.start ASC
         LIMIT 1
