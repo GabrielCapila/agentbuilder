@@ -7,7 +7,6 @@ const getFinishedGamesStats = {
   name: 'get-finished-games-stats',
   description: 'Retorna análise de jogos finalizados, incluindo placar, liga, número de palpites e número de palpites exatos.',
   schema: {
-    
   },
   handler: async ({ limit }) => {
     try {
@@ -40,7 +39,8 @@ const getFinishedGamesStats = {
           GROUP BY f.id, t1.name, t2.name, f.start, c.name, m.homeGoals, m.awayGoals
         	ORDER BY f.start DESC
       `;
-      const [rows] = await pool.query(sql);
+      const params = [brDateStr + ' 23:59:59'];
+      const [rows] = await pool.query(sql, params);
       if (!rows.length) {
         return {
           content: [{ type: 'text', text: 'Nenhum jogo finalizado encontrado.' }],
