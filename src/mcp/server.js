@@ -1,3 +1,5 @@
+import getFinishedGamesStats from './tools/getFinishedGamesStats.js';
+registerTool(getFinishedGamesStats);
 // src/mcp/server.js
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import getMonthTopUser from './tools/getMonthTopUser.js';
@@ -25,5 +27,6 @@ const registerTool = (tool) => {
 registerTool(getMonthTopUser);
 registerTool(getGameGuesses);
 registerTool(getTodayNextFixtures);
+registerTool(getFinishedGamesStats);
 
 export default mcpServer;
